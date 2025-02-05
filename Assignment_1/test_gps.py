@@ -1,7 +1,6 @@
 import pytest
 import pandas as pd
-from distance_calculator.py
-import haversine, match_closest_points  
+from distance_calculator import haversine, match_closest_points  
 
 # Function to load CSV data
 def load_csv_data(file_path):
@@ -12,10 +11,8 @@ def load_csv_data(file_path):
 # List of CSV files to test
 csv_files = [
     "Boston 311 012225.csv",
-    "case2at1.csv",
-    "iata-icao.csv",
-    "data/file4.csv",
-    "data/file5.csv"
+    "world_cities.csv",
+    "iata-icao.csv"
 ]
 
 @pytest.mark.parametrize("csv_file", csv_files)
