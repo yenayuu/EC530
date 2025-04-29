@@ -1,0 +1,12 @@
+# Don’t ever commit secrets
+/final-project/.env
+
+# Don’t commit caches or venvs
+**/__pycache__/
+*.pyc
+/final-project/.venv/
+/final-project/backend/venv/
+/final-project/node_modules/
+/final-project/frontend/node_modules/
+
+
