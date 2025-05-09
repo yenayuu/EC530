@@ -5,12 +5,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from main import app
 
-
 client = TestClient(app)
 
 def test_create_house():
     response = client.post("/api/houses", json={
-        "name": "Smart Home",
+        "name": "Unique House A",
         "address": "123 Main Street"
     })
     assert response.status_code == 200
@@ -18,18 +17,23 @@ def test_create_house():
 
 def test_duplicate_house():
     client.post("/api/houses", json={
-        "name": "Smart Home",
+        "name": "Duplicate House",
         "address": "123 Main Street"
-    })  # First creation
+    })
 
     response = client.post("/api/houses", json={
-        "name": "Smart Home",
+        "name": "Duplicate House",  # Same name
         "address": "456 Another Street"
-    })  # Duplicate name
+    })
     assert response.status_code == 400
     assert response.json()["detail"] == "House with this name already exists"
 
 def test_get_house():
+    client.post("/api/houses", json={
+        "name": "Lookup House",
+        "address": "123 Lookup Street"
+    })
+
     response = client.get("/api/houses/1")
     assert response.status_code == 200
     assert "name" in response.json()
