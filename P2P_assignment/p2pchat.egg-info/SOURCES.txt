@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+setup.py
+p2pchat/__init__.py
+p2pchat/client.py
+p2pchat/server.py
+p2pchat.egg-info/PKG-INFO
+p2pchat.egg-info/SOURCES.txt
+p2pchat.egg-info/dependency_links.txt
+p2pchat.egg-info/entry_points.txt
+p2pchat.egg-info/top_level.txt
