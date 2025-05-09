@@ -1,29 +1,32 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Dict, List
+from typing import Dict
 
 router = APIRouter()
 
-# In-memory storage for rooms
 rooms_db: Dict[int, Dict] = {}
-room_counter = 1  # Simulates auto-incrementing IDs
-
-# Allowed room types
-VALID_ROOM_TYPES = {"bedroom", "kitchen", "living room", "bathroom"}
+room_counter = 1
 
 class RoomCreate(BaseModel):
-    name: str = Field(..., min_length=3, max_length=50)
-    room_type: str = Field(..., description="Must be one of: bedroom, kitchen, living room, bathroom")
+    name: str = Field(..., min_length=2, max_length=50)
+    floor: int = Field(..., ge=0)
 
 @router.post("/houses/{house_id}/rooms")
 def create_room(house_id: int, room: RoomCreate):
     global room_counter
 
-    if room.room_type.lower() not in VALID_ROOM_TYPES:
-        raise HTTPException(status_code=400, detail="Invalid room type")
-
     room_id = room_counter
     room_counter += 1
-    rooms_db[room_id] = {"house_id": house_id, "name": room.name, "room_type": room.room_type}
+    rooms_db[room_id] = {
+        "house_id": house_id,
+        "name": room.name,
+        "floor": room.floor
+    }
 
-    return {"message": "Room added successfully", "room_id": room_id}
+    return {"message": "Room created", "room_id": room_id}
+
+@router.get("/rooms/{room_id}")
+def get_room(room_id: int):
+    if room_id not in rooms_db:
+        raise HTTPException(status_code=404, detail="Room not found")
+    return rooms_db[room_id]

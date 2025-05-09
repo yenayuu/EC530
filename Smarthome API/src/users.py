@@ -1,39 +1,33 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 from typing import Dict
-import hashlib
 
 router = APIRouter()
 
-# In-memory storage for users (temporary, no database)
-users_db: Dict[str, Dict] = {}
+# In-memory database
+users_db: Dict[int, Dict] = {}
+user_counter = 1
 
-class UserRegister(BaseModel):
+class UserCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=50)
-    email: EmailStr
-    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
+    email: str = Field(..., pattern=r"[^@]+@[^@]+\.[^@]+")
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+@router.post("/users")
+def create_user(user: UserCreate):
+    global user_counter
 
-@router.post("/users/register")
-def register_user(user: UserRegister):
-    if user.email in users_db:
+    # Check for duplicate email
+    if any(u["email"] == user.email for u in users_db.values()):
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
-    users_db[user.email] = {"name": user.name, "password": hashed_password}
+    user_id = user_counter
+    user_counter += 1
+    users_db[user_id] = {"name": user.name, "email": user.email}
 
-    return {"message": "User registered successfully"}
+    return {"message": "User created", "user_id": user_id}
 
-@router.post("/users/login")
-def login_user(user: UserLogin):
-    if user.email not in users_db:
+@router.get("/users/{user_id}")
+def get_user(user_id: int):
+    if user_id not in users_db:
         raise HTTPException(status_code=404, detail="User not found")
-
-    hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
-    if users_db[user.email]["password"] != hashed_password:
-        raise HTTPException(status_code=401, detail="Incorrect password")
-
-    return {"message": "Login successful", "user": {"name": users_db[user.email]["name"], "email": user.email}}
+    return users_db[user_id]
